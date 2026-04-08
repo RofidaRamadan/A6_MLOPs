@@ -27,3 +27,5 @@ model.fit(x_train, y_train, epochs=5)
 print("\n--- Evaluating Model ---")
 test_loss, test_acc = model.evaluate(x_test, y_test, verbose=2)
 print(f"Test Accuracy: {test_acc:.4f}")
+
+#this is a comment to test git
