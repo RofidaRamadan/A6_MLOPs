@@ -1,0 +1,43 @@
+name: ML Training Pipeline
+
+on:
+  push:
+    branches:
+      - '*' 
+
+jobs:
+  linter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run Linter
+        run: echo "Linting passed successfully!"
+  train:
+    needs: linter
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[run-train]')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Simulate Expensive GPU Training (Failing intentionally)
+        run: |
+          echo "Starting model training..."
+          # Simulating a crash by creating an error log and exiting with an error code (1)
+          echo "CUDA Out of Memory error during epoch 2." > error_logs.txt
+          exit 1
+      - name: Notify Failure
+        if: failure()
+        run: echo "Training failed! Preparing error logs..."
+
+      - name: Upload Error Logs Artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: training-error-logs
+          path: error_logs.txt
+      - name: Cleanup Resources
+        if: always()
+        run: echo "Cleaning up temporary cloud volumes..."
